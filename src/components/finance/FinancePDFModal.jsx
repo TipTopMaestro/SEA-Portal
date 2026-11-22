@@ -10,26 +10,35 @@ const FinancePDFModal = ({
   onClose,
   inflows = [],
   disbursements = [],
-  currentOfficer = null
+  events = []
 }) => {
   const [reportType, setReportType] = useState('disbursements'); // 'disbursements' | 'inflows'
+  const [eventId, setEventId] = useState('all');
+
+  const selectedEvent = events.find((event) => event.id === eventId);
+  const eventInflows = eventId === 'all'
+    ? inflows
+    : inflows.filter((item) => eventId === 'unassigned' ? !item.eventId : item.eventId === eventId);
+  const eventDisbursements = eventId === 'all'
+    ? disbursements
+    : disbursements.filter((item) => eventId === 'unassigned' ? !item.eventId : item.eventId === eventId);
 
   const mappedDisbursements = useMemo(
     () =>
-      disbursements.map((d, idx) => ({
+      eventDisbursements.map((d, idx) => ({
         id: d.id || `disb-${idx}`,
-        date: d.date || '2026-11-20',
+        date: d.requestDate || d.date || '',
         particulars: `${d.title} (${(d.category || 'Disbursement').toUpperCase()})`,
         orNumber: d.referenceNo || `OR-${String(idx + 1).padStart(5, '0')}`,
         quantity: 1,
         amount: Number(d.amount || 0),
       })),
-    [disbursements]
+    [eventDisbursements]
   );
 
   const mappedInflows = useMemo(
     () =>
-      inflows.map((inf, idx) => ({
+      eventInflows.map((inf, idx) => ({
         id: inf.id || `inf-${idx}`,
         date: inf.date || '2026-11-18',
         particulars: `${inf.source} (${(inf.category || 'Inflow').toUpperCase()})`,
@@ -37,7 +46,7 @@ const FinancePDFModal = ({
         quantity: 1,
         amount: Number(inf.amount || 0),
       })),
-    [inflows]
+    [eventInflows]
   );
 
   const reportConfig = useMemo(() => {
@@ -45,7 +54,7 @@ const FinancePDFModal = ({
       case 'inflows':
         return {
           title: 'TREASURY INFLOW REPORT',
-          eventTitle: 'COLLEGIATE CASH INFLOWS & DUES',
+          eventTitle: `${selectedEvent?.title || (eventId === 'unassigned' ? 'General / Unassigned' : 'All Events')} - CASH INFLOWS`,
           items: mappedInflows,
           fileName: `DNSC_Esports_Inflows_${new Date().toISOString().split('T')[0]}.pdf`,
         };
@@ -53,12 +62,12 @@ const FinancePDFModal = ({
       default:
         return {
           title: 'FINANCIAL REPORT',
-          eventTitle: 'DISBURSEMENT VOUCHERS LEDGER',
+          eventTitle: `${selectedEvent?.title || (eventId === 'unassigned' ? 'General / Unassigned' : 'All Events')} - DISBURSEMENTS`,
           items: mappedDisbursements,
           fileName: `DNSC_Esports_Disbursements_${new Date().toISOString().split('T')[0]}.pdf`,
         };
     }
-  }, [reportType, mappedDisbursements, mappedInflows]);
+  }, [reportType, mappedDisbursements, mappedInflows, selectedEvent, eventId]);
 
   if (!isOpen) return null;
 
@@ -71,8 +80,8 @@ const FinancePDFModal = ({
       assets={{ dnscLogo }}
       signatories={{
         preparedBy: {
-          name: currentOfficer?.name || 'BRYL JAMES B. PAGALAN',
-          role: currentOfficer?.title || 'Executive Secretary',
+          name: 'BRYL JAMES B. PAGALAN',
+          role: 'Executive Secretary',
         },
         reviewedBy: {
           name: 'HANNAH LEAH D. GUANTALAO',
@@ -130,6 +139,16 @@ const FinancePDFModal = ({
             </button>
           </div>
 
+          <select
+            value={eventId}
+            onChange={(e) => setEventId(e.target.value)}
+            className="px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          >
+            <option value="all">All Events</option>
+            {events.map((event) => <option key={event.id} value={event.id}>{event.title}</option>)}
+            <option value="unassigned">General / Unassigned</option>
+          </select>
+
           {/* Download Button */}
           <PDFDownloadLink
             document={doc}
@@ -159,7 +178,7 @@ const FinancePDFModal = ({
         {/* PDF Viewer Container */}
         <div className="w-full h-[580px] rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 shadow-inner">
           <PDFViewer
-            key={reportType}
+            key={`${reportType}-${eventId}`}
             width="100%"
             height="100%"
             showToolbar={true}

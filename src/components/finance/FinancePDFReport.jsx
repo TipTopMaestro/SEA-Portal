@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
 
   // Signatories
   signatoriesWrapper: {
-    marginTop: 22,
+    marginTop: 30,
   },
   sigRow: {
     flexDirection: 'row',
@@ -257,7 +257,7 @@ export default function FinancialReportPdf({
   orgName = 'DNSC - Student Esports Academy',
   reportTitle = 'FINANCIAL REPORT',
   eventTitle = '',
-  items = [],
+  items,
   grandTotal,
   signatories = {
     preparedBy: { name: 'BRYL JAMES B. PAGALAN', role: 'Executive Secretary' },
@@ -272,7 +272,7 @@ export default function FinancialReportPdf({
   const activeLogo = assets.dnscLogo || dnscLogoDefault;
   // Determine table items: use items if provided, or map disbursements if provided, or fall back to DEFAULT_ITEMS
   const displayItems =
-    items && items.length > 0
+    Array.isArray(items)
       ? items
       : disbursements && disbursements.length > 0
       ? disbursements.map((d, idx) => ({

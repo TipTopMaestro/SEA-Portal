@@ -5,12 +5,14 @@ import { useNotification } from '../../context/NotificationContext';
 import { portalService } from '../../services/portalService';
 import { Check } from 'lucide-react';
 
-const CashInflowModal = ({ isOpen, onClose, onCreated }) => {
+const CashInflowModal = ({ isOpen, onClose, onCreated, events = [], defaultEventId = '' }) => {
   const { user: currentOfficer } = useAuth();
   const { showToast } = useNotification();
 
   const [formData, setFormData] = useState({
     category: 'Membership Dues',
+    eventId: defaultEventId,
+    eventName: events.find((event) => event.id === defaultEventId)?.title || '',
     source: '',
     amount: '',
     paymentMethod: 'GCash',
@@ -43,7 +45,16 @@ const CashInflowModal = ({ isOpen, onClose, onCreated }) => {
 
     setSubmitting(true);
     try {
-      portalService.addInflow(formData, currentOfficer);
+      const eventName = formData.eventName.trim();
+      const event = eventName
+        ? events.find((item) => item.title.toLowerCase() === eventName.toLowerCase())
+          || portalService.createFinanceEvent(eventName, currentOfficer)
+        : null;
+      portalService.addInflow({
+        ...formData,
+        eventId: event?.id || null,
+        eventTitle: event?.title || 'General / Unassigned',
+      }, currentOfficer);
       showToast(`Recorded inflow of PHP ${Number(formData.amount).toLocaleString()}!`, 'success');
       onCreated();
       onClose();
@@ -63,6 +74,24 @@ const CashInflowModal = ({ isOpen, onClose, onCreated }) => {
       maxWidth="max-w-lg"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 font-display mb-1">
+            Event Ledger
+          </label>
+          <input
+            type="text"
+            name="eventName"
+            value={formData.eventName}
+            onChange={handleChange}
+            list="finance-inflow-events"
+            placeholder="Type an event name (new or existing)"
+            className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
+          />
+          <datalist id="finance-inflow-events">
+            {events.map((event) => <option key={event.id} value={event.title} />)}
+          </datalist>
+          <p className="text-[10px] text-slate-400 mt-1">A new ledger is created automatically when the name does not exist.</p>
+        </div>
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 font-display mb-1">
             Inflow Category *

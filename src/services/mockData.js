@@ -385,6 +385,8 @@ export const INITIAL_ATTENDANCE_RECORDS = [
 export const INITIAL_FINANCE_INFLOWS = [
   {
     id: 'inf_01',
+    eventId: 'evt_03',
+    eventTitle: 'General Academy Assembly & Orientation Q4',
     category: 'Membership Dues',
     source: '1st Semester 2026 Academy Dues (Batch 1)',
     amount: 14200.00,
@@ -396,6 +398,8 @@ export const INITIAL_FINANCE_INFLOWS = [
   },
   {
     id: 'inf_02',
+    eventId: 'evt_02',
+    eventTitle: 'DNSC Esports Booth & Recruitment Fair',
     category: 'Merchandise',
     source: 'Official Academy Esports Jersey Pre-orders (40 units)',
     amount: 28000.00,
@@ -407,6 +411,8 @@ export const INITIAL_FINANCE_INFLOWS = [
   },
   {
     id: 'inf_03',
+    eventId: 'evt_01',
+    eventTitle: 'Inter-College Scrimmage: Tactical FPS',
     category: 'Tournament Prize Share',
     source: 'Southern Mindanao Collegiate League - 2nd Place Valorant',
     amount: 15000.00,
@@ -418,6 +424,8 @@ export const INITIAL_FINANCE_INFLOWS = [
   },
   {
     id: 'inf_04',
+    eventId: 'evt_01',
+    eventTitle: 'Inter-College Scrimmage: Tactical FPS',
     category: 'Sponsorship / Donations',
     source: 'Local Cybercafe Gaming Lounge Sponsor',
     amount: 8000.00,
@@ -432,6 +440,8 @@ export const INITIAL_FINANCE_INFLOWS = [
 export const INITIAL_DISBURSEMENTS = [
   {
     id: 'disb_01',
+    eventId: 'evt_01',
+    eventTitle: 'Inter-College Scrimmage: Tactical FPS',
     title: 'Ethernet Cables & Gigabit Network Switches for Scrimmage Lab',
     category: 'Equipment & Hardware',
     amount: 4850.00,
@@ -451,6 +461,8 @@ export const INITIAL_DISBURSEMENTS = [
   },
   {
     id: 'disb_02',
+    eventId: 'evt_02',
+    eventTitle: 'DNSC Esports Booth & Recruitment Fair',
     title: 'DNSC Esports Booth Banners & Marketing Tarpaulins',
     category: 'Marketing & Events',
     amount: 2200.00,
@@ -469,6 +481,8 @@ export const INITIAL_DISBURSEMENTS = [
   },
   {
     id: 'disb_03',
+    eventId: 'evt_01',
+    eventTitle: 'Inter-College Scrimmage: Tactical FPS',
     title: 'Regional Qualifier Van Rental & Highway Toll Subsidies',
     category: 'Travel & Logistics',
     amount: 6500.00,
@@ -487,6 +501,8 @@ export const INITIAL_DISBURSEMENTS = [
   },
   {
     id: 'disb_04',
+    eventId: 'evt_01',
+    eventTitle: 'Inter-College Scrimmage: Tactical FPS',
     title: 'High-end Mechanical Keyboard & Mouse Sets for Academy Pod',
     category: 'Equipment & Hardware',
     amount: 18200.00,
