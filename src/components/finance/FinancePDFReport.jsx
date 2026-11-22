@@ -7,6 +7,7 @@ import {
   Image,
   StyleSheet,
 } from '@react-pdf/renderer';
+import dnscLogoDefault from '../../assets/dnscLogo.png';
 
 const styles = StyleSheet.create({
   page: {
@@ -34,8 +35,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   logo: {
-    width: 42,
-    height: 42,
+    width: 44,
+    height: 44,
     objectFit: 'contain',
   },
   collegeName: {
@@ -261,6 +262,7 @@ export default function FinancialReportPdf({
   disbursements = [],
   _inflows = [],
 }) {
+  const activeLogo = assets.dnscLogo || dnscLogoDefault;
   // Determine table items: use items if provided, or map disbursements if provided, or fall back to DEFAULT_ITEMS
   const displayItems =
     items && items.length > 0
@@ -306,7 +308,7 @@ export default function FinancialReportPdf({
         {/* 1. Letterhead */}
         <View style={styles.headerRow}>
           <View style={styles.brandLeft}>
-            {assets.dnscLogo && <Image src={assets.dnscLogo} style={styles.logo} />}
+            {activeLogo && <Image src={activeLogo} style={styles.logo} />}
             <View>
               <Text style={styles.collegeName}>DAVAO DEL NORTE</Text>
               <Text style={styles.collegeName}>STATE COLLEGE</Text>

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
-import { Flame, ArrowRight, UserPlus } from 'lucide-react';
+import dnscLogo from '../../assets/dnscLogo.png';
+import { ArrowRight, UserPlus } from 'lucide-react';
 import { INITIAL_GAMES } from '../../services/mockData';
 
 const RegisterPage = () => {
@@ -97,10 +98,8 @@ const RegisterPage = () => {
       <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="sm:mx-auto sm:w-full sm:max-w-2xl text-center z-10 mb-6">
-        <div className="mx-auto w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 p-0.5 shadow-md shadow-blue-500/25 flex items-center justify-center">
-          <div className="w-full h-full bg-white rounded-[14px] flex items-center justify-center">
-            <Flame className="w-6 h-6 text-blue-600" />
-          </div>
+        <div className="mx-auto w-14 h-14 rounded-2xl bg-white border border-slate-200 p-1.5 shadow-md shadow-blue-500/10 flex items-center justify-center">
+          <img src={dnscLogo} alt="DNSC Logo" className="w-full h-full object-contain" />
         </div>
         <h2 className="mt-3 text-2xl sm:text-3xl font-extrabold text-slate-900 font-display tracking-wider">
           JOIN THE ACADEMY ROSTER

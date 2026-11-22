@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import Modal from '../common/Modal';
 import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer';
 import FinancialReportPdf from './FinancePDFReport';
+import dnscLogo from '../../assets/dnscLogo.png';
 import { Download, FileText, Calendar, Receipt, Coins } from 'lucide-react';
 
 const FinancePDFModal = ({
@@ -86,6 +87,7 @@ const FinancePDFModal = ({
       reportTitle={reportConfig.title}
       eventTitle={reportConfig.eventTitle}
       items={reportConfig.items}
+      assets={{ dnscLogo }}
       signatories={{
         preparedBy: {
           name: currentOfficer?.name || 'BRYL JAMES B. PAGALAN',

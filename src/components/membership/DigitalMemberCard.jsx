@@ -2,7 +2,8 @@ import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import RoleBadge from '../common/RoleBadge';
 import StatusBadge from '../common/StatusBadge';
-import { Flame, Sparkles, Hash, Calendar } from 'lucide-react';
+import dnscLogo from '../../assets/dnscLogo.png';
+import { Sparkles, Hash, Calendar } from 'lucide-react';
 
 const DigitalMemberCard = ({ user }) => {
   if (!user) return null;
@@ -30,10 +31,8 @@ const DigitalMemberCard = ({ user }) => {
         {/* Card Header */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-100">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 p-0.5 flex items-center justify-center shadow-xs">
-              <div className="w-full h-full bg-white rounded-[6px] flex items-center justify-center">
-                <Flame className="w-4 h-4 text-blue-600" />
-              </div>
+            <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 p-0.5 flex items-center justify-center shadow-xs">
+              <img src={dnscLogo} alt="DNSC Logo" className="w-full h-full object-contain" />
             </div>
             <div>
               <span className="font-extrabold text-sm tracking-wider font-display text-slate-900">
