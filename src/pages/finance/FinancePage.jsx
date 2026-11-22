@@ -5,6 +5,7 @@ import { useNotification } from '../../context/NotificationContext';
 import CashInflowModal from '../../components/finance/CashInflowModal';
 import DisbursementModal from '../../components/finance/DisbursementModal';
 import ApprovalTimeline from '../../components/finance/ApprovalTimeline';
+import FinancePDFModal from '../../components/finance/FinancePDFModal';
 import Modal from '../../components/common/Modal';
 import StatusBadge from '../../components/common/StatusBadge';
 import RoleBadge from '../../components/common/RoleBadge';
@@ -21,7 +22,8 @@ import {
   ExternalLink,
   Coins,
   ShieldCheck,
-  Building
+  Building,
+  FileText
 } from 'lucide-react';
 
 const FinancePage = () => {
@@ -37,6 +39,7 @@ const FinancePage = () => {
   // Modals
   const [isInflowModalOpen, setIsInflowModalOpen] = useState(false);
   const [isDisbursementModalOpen, setIsDisbursementModalOpen] = useState(false);
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [activeReceiptUrl, setActiveReceiptUrl] = useState(null);
 
   // Rejection modal
@@ -171,6 +174,14 @@ const FinancePage = () => {
           >
             <Plus className="w-4 h-4" />
             <span>Request Disbursement</span>
+          </button>
+
+          <button
+            onClick={() => setIsPdfModalOpen(true)}
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold uppercase tracking-wider font-display border border-blue-200 transition-all cursor-pointer shadow-2xs"
+          >
+            <FileText className="w-4 h-4 text-blue-600" />
+            <span>View PDF Report</span>
           </button>
 
           <ExportButton
@@ -536,6 +547,14 @@ const FinancePage = () => {
           </div>
         </form>
       </Modal>
+      {/* Viewable React-PDF Report Modal */}
+      <FinancePDFModal
+        isOpen={isPdfModalOpen}
+        onClose={() => setIsPdfModalOpen(false)}
+        inflows={inflows}
+        disbursements={disbursements}
+        currentOfficer={currentUser}
+      />
     </div>
   );
 };
