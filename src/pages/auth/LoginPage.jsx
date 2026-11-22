@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
-import { Flame, Shield, Gamepad2, Coins, User, ArrowRight, Lock, Mail, AlertCircle } from 'lucide-react';
+import dnscLogo from '../../assets/dnscLogo.png';
+import { Shield, Gamepad2, Coins, User, ArrowRight, Lock, Mail, AlertCircle } from 'lucide-react';
 
 const LoginPage = () => {
   const [identifier, setIdentifier] = useState('');
@@ -62,11 +63,9 @@ const LoginPage = () => {
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center z-10 px-4">
-        {/* Brand Icon */}
-        <div className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 p-0.5 shadow-lg shadow-blue-500/25 flex items-center justify-center">
-          <div className="w-full h-full bg-white rounded-[14px] flex items-center justify-center">
-            <Flame className="w-8 h-8 text-blue-600" />
-          </div>
+        {/* Brand Logo */}
+        <div className="mx-auto w-16 h-16 rounded-2xl bg-white border border-slate-200 p-1.5 shadow-lg shadow-blue-500/10 flex items-center justify-center">
+          <img src={dnscLogo} alt="DNSC Logo" className="w-full h-full object-contain" />
         </div>
 
         <h2 className="mt-4 text-3xl font-extrabold text-slate-900 font-display tracking-wider">

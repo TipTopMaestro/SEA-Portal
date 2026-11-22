@@ -17,6 +17,7 @@ const STORAGE_KEYS = {
   ATTENDANCE_EVENTS: 'nexus_sea_attendance_events',
   ATTENDANCE_RECORDS: 'nexus_sea_attendance_records',
   FINANCE_INFLOWS: 'nexus_sea_finance_inflows',
+  FINANCE_EVENTS: 'nexus_sea_finance_events',
   DISBURSEMENTS: 'nexus_sea_disbursements',
   CURRENT_USER: 'nexus_sea_current_user',
   TOKEN: 'nexus_sea_token'
@@ -41,6 +42,9 @@ export const initializeStorage = () => {
   }
   if (!localStorage.getItem(STORAGE_KEYS.FINANCE_INFLOWS)) {
     localStorage.setItem(STORAGE_KEYS.FINANCE_INFLOWS, JSON.stringify(INITIAL_FINANCE_INFLOWS));
+  }
+  if (!localStorage.getItem(STORAGE_KEYS.FINANCE_EVENTS)) {
+    localStorage.setItem(STORAGE_KEYS.FINANCE_EVENTS, JSON.stringify([]));
   }
   if (!localStorage.getItem(STORAGE_KEYS.DISBURSEMENTS)) {
     localStorage.setItem(STORAGE_KEYS.DISBURSEMENTS, JSON.stringify(INITIAL_DISBURSEMENTS));
@@ -379,6 +383,36 @@ export const portalService = {
   },
 
   // --- FINANCE & DISBURSEMENTS ---
+  getFinanceEvents: () => {
+    const attendanceEvents = portalService.getAttendanceEvents();
+    const customEvents = getStored(STORAGE_KEYS.FINANCE_EVENTS, []);
+    return [...attendanceEvents, ...customEvents].filter(
+      (event, index, all) => all.findIndex((candidate) => candidate.id === event.id) === index
+    );
+  },
+
+  createFinanceEvent: (title, officer) => {
+    const normalizedTitle = String(title || '').trim();
+    if (!normalizedTitle) throw new Error('Event name is required');
+
+    const existing = portalService.getFinanceEvents().find(
+      (event) => event.title.toLowerCase() === normalizedTitle.toLowerCase()
+    );
+    if (existing) return existing;
+
+    const customEvents = getStored(STORAGE_KEYS.FINANCE_EVENTS, []);
+    const newEvent = {
+      id: `fin_evt_${Date.now()}`,
+      title: normalizedTitle,
+      type: 'finance',
+      date: new Date().toISOString().split('T')[0],
+      createdBy: officer?.name || 'Finance Officer',
+      custom: true,
+    };
+    setStored(STORAGE_KEYS.FINANCE_EVENTS, [...customEvents, newEvent]);
+    return newEvent;
+  },
+
   getFinanceInflows: () => getStored(STORAGE_KEYS.FINANCE_INFLOWS, INITIAL_FINANCE_INFLOWS),
   getDisbursements: () => getStored(STORAGE_KEYS.DISBURSEMENTS, INITIAL_DISBURSEMENTS),
 
@@ -386,6 +420,8 @@ export const portalService = {
     const inflows = portalService.getFinanceInflows();
     const newInflow = {
       id: `inf_${Date.now()}`,
+      eventId: inflowData.eventId || null,
+      eventTitle: inflowData.eventTitle || 'General / Unassigned',
       category: inflowData.category,
       source: inflowData.source,
       amount: Number(inflowData.amount),
@@ -413,6 +449,8 @@ export const portalService = {
     const disbursements = portalService.getDisbursements();
     const newDisbursement = {
       id: `disb_${Date.now()}`,
+      eventId: requestData.eventId || null,
+      eventTitle: requestData.eventTitle || 'General / Unassigned',
       title: requestData.title,
       category: requestData.category,
       amount: Number(requestData.amount),

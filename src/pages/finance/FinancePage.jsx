@@ -5,6 +5,7 @@ import { useNotification } from '../../context/NotificationContext';
 import CashInflowModal from '../../components/finance/CashInflowModal';
 import DisbursementModal from '../../components/finance/DisbursementModal';
 import ApprovalTimeline from '../../components/finance/ApprovalTimeline';
+import FinancePDFModal from '../../components/finance/FinancePDFModal';
 import Modal from '../../components/common/Modal';
 import StatusBadge from '../../components/common/StatusBadge';
 import RoleBadge from '../../components/common/RoleBadge';
@@ -21,7 +22,8 @@ import {
   ExternalLink,
   Coins,
   ShieldCheck,
-  Building
+  Building,
+  FileText
 } from 'lucide-react';
 
 const FinancePage = () => {
@@ -30,6 +32,8 @@ const FinancePage = () => {
 
   const [inflows, setInflows] = useState([]);
   const [disbursements, setDisbursements] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [selectedEventId, setSelectedEventId] = useState('all');
   const [activeTab, setActiveTab] = useState('disbursements');
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -37,6 +41,7 @@ const FinancePage = () => {
   // Modals
   const [isInflowModalOpen, setIsInflowModalOpen] = useState(false);
   const [isDisbursementModalOpen, setIsDisbursementModalOpen] = useState(false);
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [activeReceiptUrl, setActiveReceiptUrl] = useState(null);
 
   // Rejection modal
@@ -50,24 +55,33 @@ const FinancePage = () => {
   const loadData = () => {
     setInflows(portalService.getFinanceInflows());
     setDisbursements(portalService.getDisbursements());
+    setEvents(portalService.getFinanceEvents());
   };
 
   useEffect(() => {
     loadData();
   }, []);
 
-  // Financial Metrics
-  const totalInflowsAmount = inflows.reduce((sum, item) => sum + Number(item.amount), 0);
-  const totalDisbursedAmount = disbursements
+  const isInSelectedLedger = (item) => selectedEventId === 'all'
+    || (selectedEventId === 'unassigned' ? !item.eventId : item.eventId === selectedEventId);
+  const ledgerInflows = inflows.filter(isInSelectedLedger);
+  const ledgerDisbursements = disbursements.filter(isInSelectedLedger);
+  const selectedEvent = events.find((event) => event.id === selectedEventId);
+  const selectedLedgerTitle = selectedEvent?.title
+    || (selectedEventId === 'unassigned' ? 'General / Unassigned' : 'All Events');
+
+  // Financial Metrics for the selected event ledger
+  const totalInflowsAmount = ledgerInflows.reduce((sum, item) => sum + Number(item.amount), 0);
+  const totalDisbursedAmount = ledgerDisbursements
     .filter((d) => d.status === 'disbursed')
     .reduce((sum, d) => sum + Number(d.amount), 0);
   const netTreasuryBalance = totalInflowsAmount - totalDisbursedAmount;
-  const pendingApprovalsCount = disbursements.filter(
+  const pendingApprovalsCount = ledgerDisbursements.filter(
     (d) => d.status === 'submitted' || d.status === 'finance_approved' || d.status === 'executive_signed'
   ).length;
 
   // Filtered disbursements
-  const filteredDisbursements = disbursements.filter((d) => {
+  const filteredDisbursements = ledgerDisbursements.filter((d) => {
     const matchesCategory = categoryFilter === 'all' || d.category === categoryFilter;
     const matchesSearch =
       d.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -77,7 +91,7 @@ const FinancePage = () => {
   });
 
   // Filtered inflows
-  const filteredInflows = inflows.filter((inf) => {
+  const filteredInflows = ledgerInflows.filter((inf) => {
     const matchesCategory = categoryFilter === 'all' || inf.category === categoryFilter;
     const matchesSearch =
       inf.source.toLowerCase().includes(search.toLowerCase()) ||
@@ -173,11 +187,43 @@ const FinancePage = () => {
             <span>Request Disbursement</span>
           </button>
 
+          <button
+            onClick={() => setIsPdfModalOpen(true)}
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold uppercase tracking-wider font-display border border-blue-200 transition-all cursor-pointer shadow-2xs"
+          >
+            <FileText className="w-4 h-4 text-blue-600" />
+            <span>View PDF Report</span>
+          </button>
+
           <ExportButton
-            data={activeTab === 'disbursements' ? disbursements : inflows}
-            filename={activeTab === 'disbursements' ? 'disbursement_vouchers' : 'cash_inflows_ledger'}
+            data={activeTab === 'disbursements' ? ledgerDisbursements : ledgerInflows}
+            filename={`${selectedLedgerTitle.replace(/[^a-z0-9]+/gi, '_').toLowerCase()}_${activeTab}`}
             label="Export Data"
           />
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <div>
+            <p className="text-[10px] font-mono uppercase tracking-wider text-blue-600 font-bold">Event Ledger</p>
+            <h2 className="text-base font-bold text-slate-900 font-display">{selectedLedgerTitle}</h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              {ledgerInflows.length + ledgerDisbursements.length} transactions: {ledgerInflows.length} inflows and {ledgerDisbursements.length} disbursements
+            </p>
+          </div>
+          <select
+            value={selectedEventId}
+            onChange={(e) => {
+              setSelectedEventId(e.target.value);
+              setCategoryFilter('all');
+            }}
+            className="w-full lg:w-96 px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
+          >
+            <option value="all">All Events (Consolidated Ledger)</option>
+            {events.map((event) => <option key={event.id} value={event.id}>{event.title}</option>)}
+            <option value="unassigned">General / Unassigned</option>
+          </select>
         </div>
       </div>
 
@@ -193,7 +239,7 @@ const FinancePage = () => {
         <StatCard
           title="Total Cash Inflows"
           value={`₱${totalInflowsAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
-          subtitle={`${inflows.length} recorded inflows`}
+          subtitle={`${ledgerInflows.length} recorded inflows`}
           icon={TrendingUp}
           color="emerald"
         />
@@ -225,7 +271,7 @@ const FinancePage = () => {
             }`}
           >
             <Receipt className="w-4 h-4" />
-            <span>Disbursements & Approvals ({disbursements.length})</span>
+            <span>Disbursements & Approvals ({ledgerDisbursements.length})</span>
           </button>
 
           <button
@@ -237,7 +283,7 @@ const FinancePage = () => {
             }`}
           >
             <Coins className="w-4 h-4" />
-            <span>Cash Inflows Ledger ({inflows.length})</span>
+            <span>Cash Inflows Ledger ({ledgerInflows.length})</span>
           </button>
         </div>
 
@@ -311,6 +357,7 @@ const FinancePage = () => {
                           {d.category}
                         </span>
                         <StatusBadge status={d.status} />
+                        <span className="text-[10px] text-blue-700 font-medium">{d.eventTitle || 'General / Unassigned'}</span>
                       </div>
                       <h3 className="text-base font-bold text-slate-900 font-display">
                         {d.title}
@@ -426,6 +473,7 @@ const FinancePage = () => {
                       <div className="font-bold text-slate-900 font-display">
                         {inf.source}
                       </div>
+                      <div className="text-[10px] text-blue-600 font-medium mt-0.5">{inf.eventTitle || 'General / Unassigned'}</div>
                       {inf.notes && (
                         <div className="text-[11px] text-slate-500 truncate max-w-xs">
                           {inf.notes}
@@ -467,16 +515,22 @@ const FinancePage = () => {
 
       {/* Record Inflow Modal */}
       <CashInflowModal
+        key={`inflow-${selectedEventId}`}
         isOpen={isInflowModalOpen}
         onClose={() => setIsInflowModalOpen(false)}
         onCreated={loadData}
+        events={events}
+        defaultEventId={selectedEventId === 'all' || selectedEventId === 'unassigned' ? '' : selectedEventId}
       />
 
       {/* Request Disbursement Modal */}
       <DisbursementModal
+        key={`disbursement-${selectedEventId}`}
         isOpen={isDisbursementModalOpen}
         onClose={() => setIsDisbursementModalOpen(false)}
         onCreated={loadData}
+        events={events}
+        defaultEventId={selectedEventId === 'all' || selectedEventId === 'unassigned' ? '' : selectedEventId}
       />
 
       {/* Receipt Image Preview Modal */}
@@ -536,6 +590,14 @@ const FinancePage = () => {
           </div>
         </form>
       </Modal>
+      {/* Viewable React-PDF Report Modal */}
+      <FinancePDFModal
+        isOpen={isPdfModalOpen}
+        onClose={() => setIsPdfModalOpen(false)}
+        inflows={inflows}
+        disbursements={disbursements}
+        events={events}
+      />
     </div>
   );
 };

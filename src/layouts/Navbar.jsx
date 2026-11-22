@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import RoleBadge from '../components/common/RoleBadge';
+import dnscLogo from '../assets/dnscLogo.png';
 import {
   Menu,
   X,
   LogOut,
-  Flame,
   ChevronDown
 } from 'lucide-react';
 
@@ -40,10 +40,8 @@ const Navbar = ({ toggleMobileSidebar, isMobileOpen }) => {
         </button>
 
         <Link to="/dashboard" className="flex items-center gap-2.5 group">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 p-0.5 shadow-md shadow-blue-500/20 group-hover:shadow-blue-500/30 transition-all">
-            <div className="w-full h-full bg-white rounded-[10px] flex items-center justify-center">
-              <Flame className="w-5 h-5 text-blue-600 group-hover:scale-110 transition-transform" />
-            </div>
+          <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 p-1 shadow-xs group-hover:border-blue-300 group-hover:shadow-blue-500/10 transition-all flex items-center justify-center overflow-hidden">
+            <img src={dnscLogo} alt="DNSC Logo" className="w-full h-full object-contain group-hover:scale-105 transition-transform" />
           </div>
           <div>
             <div className="flex items-center gap-2">

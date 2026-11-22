@@ -26,38 +26,41 @@ const Sidebar = ({ isMobileOpen, closeMobileSidebar }) => {
       to: '/hr',
       label: 'HR & RBAC Management',
       icon: ShieldCheck,
-      badge: role === ROLES.EXECUTIVE ? 'Admin' : 'Protected',
-      roles: [ROLES.EXECUTIVE, ROLES.GAME_MANAGER, ROLES.FINANCE_OFFICER, ROLES.MEMBER],
+      badge: 'Admin',
+      roles: [ROLES.EXECUTIVE],
     },
     {
       to: '/membership',
       label: 'Registration & Dues',
       icon: Users,
       badge: role === ROLES.MEMBER ? 'My Card' : 'Roster',
-      roles: [ROLES.EXECUTIVE, ROLES.GAME_MANAGER, ROLES.FINANCE_OFFICER, ROLES.MEMBER],
+      roles: [ROLES.EXECUTIVE, ROLES.FINANCE_OFFICER, ROLES.MEMBER],
     },
     {
       to: '/tryouts',
       label: 'Tryouts & Evaluation',
       icon: Swords,
       badge: role === ROLES.MEMBER ? 'Apply' : 'Queue',
-      roles: [ROLES.EXECUTIVE, ROLES.GAME_MANAGER, ROLES.FINANCE_OFFICER, ROLES.MEMBER],
+      roles: [ROLES.EXECUTIVE, ROLES.GAME_MANAGER, ROLES.MEMBER],
     },
     {
       to: '/attendance',
       label: 'QR Attendance',
       icon: QrCode,
       badge: role === ROLES.MEMBER ? 'Scan' : 'Host',
-      roles: [ROLES.EXECUTIVE, ROLES.GAME_MANAGER, ROLES.FINANCE_OFFICER, ROLES.MEMBER],
+      roles: [ROLES.EXECUTIVE, ROLES.GAME_MANAGER, ROLES.MEMBER],
     },
     {
       to: '/finance',
       label: 'Finance & Approvals',
       icon: DollarSign,
-      badge: role === ROLES.FINANCE_OFFICER ? 'Disburse' : role === ROLES.EXECUTIVE ? 'Sign-Off' : 'Audit',
-      roles: [ROLES.EXECUTIVE, ROLES.GAME_MANAGER, ROLES.FINANCE_OFFICER, ROLES.MEMBER],
+      badge: role === ROLES.FINANCE_OFFICER ? 'Disburse' : 'Sign-Off',
+      roles: [ROLES.EXECUTIVE, ROLES.FINANCE_OFFICER],
     },
   ];
+
+  // Strictly filter and remove modules where current user has no permissions
+  const accessibleNavItems = navItems.filter((item) => item.roles.includes(role));
 
   return (
     <>
@@ -81,7 +84,7 @@ const Sidebar = ({ isMobileOpen, closeMobileSidebar }) => {
             Core Modules
           </div>
 
-          {navItems.map((item) => {
+          {accessibleNavItems.map((item) => {
             const Icon = item.icon;
             return (
               <NavLink
