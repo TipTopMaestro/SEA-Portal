@@ -40,23 +40,58 @@ function App() {
               {/* Default redirect to Dashboard */}
               <Route index element={<Navigate to="/dashboard" replace />} />
 
-              {/* Module 6: Dashboards & Role Analytics */}
+              {/* Module 6: Dashboards & Role Analytics - Accessible to all authenticated users */}
               <Route path="dashboard" element={<DashboardPage />} />
 
-              {/* Module 1: HR Management & RBAC */}
-              <Route path="hr" element={<HRManagementPage />} />
+              {/* Module 1: HR Management & RBAC - Executive Officers Only */}
+              <Route
+                path="hr"
+                element={
+                  <ProtectedRoute allowedRoles={[ROLES.EXECUTIVE]}>
+                    <HRManagementPage />
+                  </ProtectedRoute>
+                }
+              />
 
-              {/* Module 2: Registration & Membership */}
-              <Route path="membership" element={<MembershipPage />} />
+              {/* Module 2: Registration & Membership - Executive, Finance Officer, Member */}
+              <Route
+                path="membership"
+                element={
+                  <ProtectedRoute allowedRoles={[ROLES.EXECUTIVE, ROLES.FINANCE_OFFICER, ROLES.MEMBER]}>
+                    <MembershipPage />
+                  </ProtectedRoute>
+                }
+              />
 
-              {/* Module 3: Tryout Evaluation & Queueing */}
-              <Route path="tryouts" element={<TryoutsPage />} />
+              {/* Module 3: Tryout Evaluation & Queueing - Executive, Game Manager, Member */}
+              <Route
+                path="tryouts"
+                element={
+                  <ProtectedRoute allowedRoles={[ROLES.EXECUTIVE, ROLES.GAME_MANAGER, ROLES.MEMBER]}>
+                    <TryoutsPage />
+                  </ProtectedRoute>
+                }
+              />
 
-              {/* Module 4: QR-Code Attendance (Mobile-First) */}
-              <Route path="attendance" element={<AttendancePage />} />
+              {/* Module 4: QR-Code Attendance (Mobile-First) - Executive, Game Manager, Member */}
+              <Route
+                path="attendance"
+                element={
+                  <ProtectedRoute allowedRoles={[ROLES.EXECUTIVE, ROLES.GAME_MANAGER, ROLES.MEMBER]}>
+                    <AttendancePage />
+                  </ProtectedRoute>
+                }
+              />
 
-              {/* Module 5: Finance Tracking & Approvals */}
-              <Route path="finance" element={<FinancePage />} />
+              {/* Module 5: Finance Tracking & Approvals - Executive, Finance Officer */}
+              <Route
+                path="finance"
+                element={
+                  <ProtectedRoute allowedRoles={[ROLES.EXECUTIVE, ROLES.FINANCE_OFFICER]}>
+                    <FinancePage />
+                  </ProtectedRoute>
+                }
+              />
             </Route>
 
             {/* 404 Catch-All */}

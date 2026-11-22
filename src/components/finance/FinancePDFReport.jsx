@@ -316,6 +316,7 @@ export default function FinancialReportPdf({
           <View style={styles.headerRight}>
             <Text>president@dnsc.edu.ph</Text>
             <Text>dnsc.edu.ph</Text>
+            <Text>@officialdnsc</Text>
             <Text>New Visayas, Panabo City, 8105</Text>
           </View>
         </View>
