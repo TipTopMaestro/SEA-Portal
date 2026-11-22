@@ -3,7 +3,7 @@ import Modal from '../common/Modal';
 import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer';
 import FinancialReportPdf from './FinancePDFReport';
 import dnscLogo from '../../assets/dnscLogo.png';
-import { Download, FileText, Calendar, Receipt, Coins } from 'lucide-react';
+import { Download, FileText, Receipt, Coins } from 'lucide-react';
 
 const FinancePDFModal = ({
   isOpen,
@@ -12,19 +12,7 @@ const FinancePDFModal = ({
   disbursements = [],
   currentOfficer = null
 }) => {
-  const [reportType, setReportType] = useState('event'); // 'event' | 'disbursements' | 'inflows'
-
-  // Pre-configured M7 Watch Party sample data as specified in institutional audit format
-  const eventItems = useMemo(
-    () => [
-      { id: '1', date: '2026-11-10', particulars: 'Venue Audio-Visual & Projector Rental', orNumber: 'OR-88291', quantity: 1, amount: 4500.0 },
-      { id: '2', date: '2026-11-11', particulars: 'Live Broadcast Stream License & Overlays', orNumber: 'OR-88304', quantity: 1, amount: 2200.0 },
-      { id: '3', date: '2026-11-12', particulars: 'Participant Refreshments & Meals (80 pax)', orNumber: 'OR-88340', quantity: 80, amount: 3600.0 },
-      { id: '4', date: '2026-11-12', particulars: 'Event Banners & Tarpaulin Decors', orNumber: 'OR-88355', quantity: 4, amount: 1450.0 },
-      { id: '5', date: '2026-11-13', particulars: 'Logistics, Cable Management & Supplies', orNumber: 'OR-88372', quantity: 6, amount: 480.0 },
-    ],
-    []
-  );
+  const [reportType, setReportType] = useState('disbursements'); // 'disbursements' | 'inflows'
 
   const mappedDisbursements = useMemo(
     () =>
@@ -54,13 +42,6 @@ const FinancePDFModal = ({
 
   const reportConfig = useMemo(() => {
     switch (reportType) {
-      case 'disbursements':
-        return {
-          title: 'FINANCIAL REPORT',
-          eventTitle: 'DISBURSEMENT VOUCHERS LEDGER',
-          items: mappedDisbursements,
-          fileName: `DNSC_Esports_Disbursements_${new Date().toISOString().split('T')[0]}.pdf`,
-        };
       case 'inflows':
         return {
           title: 'TREASURY INFLOW REPORT',
@@ -68,16 +49,16 @@ const FinancePDFModal = ({
           items: mappedInflows,
           fileName: `DNSC_Esports_Inflows_${new Date().toISOString().split('T')[0]}.pdf`,
         };
-      case 'event':
+      case 'disbursements':
       default:
         return {
           title: 'FINANCIAL REPORT',
-          eventTitle: 'M7 WATCH PARTY',
-          items: eventItems,
-          fileName: `DNSC_Esports_M7_Watch_Party_Report.pdf`,
+          eventTitle: 'DISBURSEMENT VOUCHERS LEDGER',
+          items: mappedDisbursements,
+          fileName: `DNSC_Esports_Disbursements_${new Date().toISOString().split('T')[0]}.pdf`,
         };
     }
-  }, [reportType, eventItems, mappedDisbursements, mappedInflows]);
+  }, [reportType, mappedDisbursements, mappedInflows]);
 
   if (!isOpen) return null;
 
@@ -124,41 +105,28 @@ const FinancePDFModal = ({
           <div className="flex items-center gap-1.5 p-1 bg-white rounded-xl border border-slate-200 shadow-2xs">
             <button
               type="button"
-              onClick={() => setReportType('event')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold font-display tracking-wider uppercase transition-all cursor-pointer ${
-                reportType === 'event'
-                  ? 'bg-blue-600 text-white shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-              }`}
-            >
-              <Calendar className="w-3.5 h-3.5" />
-              <span>M7 Watch Party</span>
-            </button>
-
-            <button
-              type="button"
               onClick={() => setReportType('disbursements')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold font-display tracking-wider uppercase transition-all cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold font-display tracking-wider uppercase transition-all cursor-pointer ${
                 reportType === 'disbursements'
                   ? 'bg-blue-600 text-white shadow-2xs'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
               <Receipt className="w-3.5 h-3.5" />
-              <span>Live Disbursements</span>
+              <span>Disbursement Vouchers</span>
             </button>
 
             <button
               type="button"
               onClick={() => setReportType('inflows')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold font-display tracking-wider uppercase transition-all cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold font-display tracking-wider uppercase transition-all cursor-pointer ${
                 reportType === 'inflows'
                   ? 'bg-blue-600 text-white shadow-2xs'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
               <Coins className="w-3.5 h-3.5" />
-              <span>Live Inflows</span>
+              <span>Cash Inflows & Dues</span>
             </button>
           </div>
 
@@ -182,7 +150,7 @@ const FinancePDFModal = ({
           <div className="flex items-center gap-2">
             <FileText className="w-3.5 h-3.5 text-blue-600" />
             <span className="font-semibold text-slate-700">
-              {reportConfig.eventTitle} • {reportConfig.items.length} Line Items
+              {reportConfig.eventTitle} • {reportConfig.items.length} Recorded Entries
             </span>
           </div>
           <span className="text-[11px] text-slate-400">DNSC Institutional Format • A4 Layout</span>

@@ -35,20 +35,27 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   logo: {
-    width: 44,
-    height: 44,
+    width: 42,
+    height: 42,
+    padding:1,
     objectFit: 'contain',
   },
-  collegeName: {
+  collegeName1: {
     fontSize: 11,
     fontFamily: 'Helvetica-Bold',
-    color: '#14532d',
+    color: '#000000',
+    letterSpacing: 0.4,
+  },
+  collegeName2: {
+    fontSize: 11,
+    fontFamily: 'Helvetica',
+    color: '#000000',
     letterSpacing: 0.4,
   },
   tagline: {
     fontSize: 7.5,
     fontFamily: 'Helvetica-Oblique',
-    color: '#15803d',
+    color: '#000000',
     marginTop: 1,
   },
   headerRight: {
@@ -239,17 +246,17 @@ const formatAmount = (num) =>
   });
 
 const DEFAULT_ITEMS = [
-  { id: '1', date: '2026-11-10', particulars: 'Venue Audio-Visual & Projector Rental', orNumber: 'OR-88291', quantity: 1, amount: 4500.0 },
-  { id: '2', date: '2026-11-11', particulars: 'Live Broadcast Stream License & Overlays', orNumber: 'OR-88304', quantity: 1, amount: 2200.0 },
-  { id: '3', date: '2026-11-12', particulars: 'Participant Refreshments & Meals (80 pax)', orNumber: 'OR-88340', quantity: 80, amount: 3600.0 },
-  { id: '4', date: '2026-11-12', particulars: 'Event Banners & Tarpaulin Decors', orNumber: 'OR-88355', quantity: 4, amount: 1450.0 },
-  { id: '5', date: '2026-11-13', particulars: 'Logistics, Cable Management & Supplies', orNumber: 'OR-88372', quantity: 6, amount: 480.0 },
+  { id: '1', date: '2026-11-10', particulars: 'Campus Esports Arena Equipment Maintenance', orNumber: 'OR-88291', quantity: 1, amount: 4500.0 },
+  { id: '2', date: '2026-11-11', particulars: 'Official Collegiate League Registration Fees', orNumber: 'OR-88304', quantity: 1, amount: 2200.0 },
+  { id: '3', date: '2026-11-12', particulars: 'Academy General Assembly Refreshments', orNumber: 'OR-88340', quantity: 80, amount: 3600.0 },
+  { id: '4', date: '2026-11-12', particulars: 'DNSC Varsity Team Collateral & Banners', orNumber: 'OR-88355', quantity: 4, amount: 1450.0 },
+  { id: '5', date: '2026-11-13', particulars: 'Office and Operations Supplies', orNumber: 'OR-88372', quantity: 6, amount: 480.0 },
 ];
 
 export default function FinancialReportPdf({
   orgName = 'DNSC - Student Esports Academy',
   reportTitle = 'FINANCIAL REPORT',
-  eventTitle = 'M7 WATCH PARTY',
+  eventTitle = '',
   items = [],
   grandTotal,
   signatories = {
@@ -310,8 +317,8 @@ export default function FinancialReportPdf({
           <View style={styles.brandLeft}>
             {activeLogo && <Image src={activeLogo} style={styles.logo} />}
             <View>
-              <Text style={styles.collegeName}>DAVAO DEL NORTE</Text>
-              <Text style={styles.collegeName}>STATE COLLEGE</Text>
+              <Text style={styles.collegeName1}>DAVAO DEL NORTE</Text>
+              <Text style={styles.collegeName2}>STATE COLLEGE</Text>
               <Text style={styles.tagline}>"Inspiring Change, Creating Futures"</Text>
             </View>
           </View>
