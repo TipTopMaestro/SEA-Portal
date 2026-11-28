@@ -3,9 +3,10 @@ import { useAuth } from '../../context/AuthContext';
 import { portalService } from '../../services/portalService';
 import QRGeneratorModal from '../../components/attendance/QRGeneratorModal';
 import QRScannerView from '../../components/attendance/QRScannerView';
-import RoleBadge from '../../components/common/RoleBadge';
-import StatCard from '../../components/common/StatCard';
 import ExportButton from '../../components/common/ExportButton';
+import HeroBanner from '../../components/common/HeroBanner';
+import StatStrip from '../../components/common/StatStrip';
+import RingProgress from '../../components/common/RingProgress';
 import {
   QrCode,
   Calendar,
@@ -22,14 +23,16 @@ const AttendancePage = () => {
   const { role, ROLES } = useAuth();
   const [events, setEvents] = useState([]);
   const [records, setRecords] = useState([]);
-  const [activeTab, setActiveTab] = useState(
-    role === ROLES.MEMBER ? 'scanner' : 'events'
-  );
+  const [activeTab, setActiveTab] = useState('events');
   const [search, setSearch] = useState('');
   const [eventFilter, setEventFilter] = useState('all');
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
 
+  // Only Game Managers and Executives handle attendance
   const canHostEvents = role === ROLES.GAME_MANAGER || role === ROLES.EXECUTIVE;
+
+  // Members (and other non-officers) only ever see the attendance log
+  const currentTab = canHostEvents ? activeTab : 'logs';
 
   const loadData = () => {
     setEvents(portalService.getAttendanceEvents());
@@ -59,112 +62,88 @@ const AttendancePage = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-mono uppercase tracking-wider text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200 font-bold">
-              Module 4 • Live Attendance
-            </span>
-            <RoleBadge role={role} size="xs" />
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-display tracking-tight">
-            QR-Code Attendance & Scrimmage Check-In
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
-            Mobile-first real-time attendance verification for academy scrimmages, campus booths, and assemblies.
-          </p>
-        </div>
+      {/* Hero banner (replaces the old header) */}
+      <HeroBanner
+        eyebrow="Module 4 • Live Attendance"
+        title="Check in."
+        highlight="Level up."
+        subtitle="Real-time attendance for scrimmages, campus booths, and assemblies."
+        chips={['Scrimmage', 'Booth', 'Assembly']}
+      >
+        {canHostEvents && (
+          <button
+            onClick={() => setIsGeneratorOpen(true)}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-semibold uppercase tracking-wider cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Host QR Session</span>
+          </button>
+        )}
+        <ExportButton data={records} filename="attendance_records_log" label="Export Logs" />
+      </HeroBanner>
 
-        <div className="flex items-center gap-2.5">
-          {canHostEvents && (
+      {/* Stat strip + ring (replaces the old KPI cards) */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-4">
+        <StatStrip
+          stats={[
+            { label: 'Check-Ins', value: totalScans, unit: 'verified', icon: Users },
+            { label: 'Live Sessions', value: activeEventsCount, unit: 'open', icon: Clock },
+            { label: 'Scrimmage', value: scrimmageScans, unit: 'check-ins', icon: CheckCircle2 },
+            { label: 'Events', value: events.length, unit: 'hosted', icon: Calendar },
+          ]}
+        />
+        <RingProgress
+          percent={events.length ? Math.round((activeEventsCount / events.length) * 100) : 0}
+          label="Active"
+          caption={`${activeEventsCount} / ${events.length} sessions`}
+        />
+      </div>
+
+      {/* Tab navigation: officers only (members go straight to the log) */}
+      {canHostEvents && (
+        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+          <div className="flex gap-2">
             <button
-              onClick={() => setIsGeneratorOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 text-white text-xs font-semibold uppercase tracking-wider font-display shadow-md shadow-blue-500/20 transition-all cursor-pointer"
+              onClick={() => setActiveTab('scanner')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold uppercase font-display tracking-wider transition-all cursor-pointer ${
+                currentTab === 'scanner'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200'
+              }`}
             >
-              <Plus className="w-4 h-4" />
-              <span>Host QR Session</span>
+              <Smartphone className="w-4 h-4" />
+              <span>Mobile Scanner (Officer)</span>
             </button>
-          )}
-          <ExportButton data={records} filename="attendance_records_log" label="Export Logs" />
+
+            <button
+              onClick={() => setActiveTab('events')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold uppercase font-display tracking-wider transition-all cursor-pointer ${
+                currentTab === 'events'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200'
+              }`}
+            >
+              <QrCode className="w-4 h-4" />
+              <span>Active QR Sessions ({events.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('logs')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold uppercase font-display tracking-wider transition-all cursor-pointer ${
+                currentTab === 'logs'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200'
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              <span>Attendance Log ({records.length})</span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Verified Attendee Check-Ins"
-          value={totalScans}
-          subtitle="Real-time records"
-          icon={Users}
-          color="blue"
-        />
-        <StatCard
-          title="Active Live Sessions"
-          value={activeEventsCount}
-          subtitle="Open for scans"
-          icon={Clock}
-          color="emerald"
-        />
-        <StatCard
-          title="Scrimmage Check-Ins"
-          value={scrimmageScans}
-          subtitle="Varsity practices"
-          icon={CheckCircle2}
-          color="purple"
-        />
-        <StatCard
-          title="Total Events Hosted"
-          value={events.length}
-          subtitle="Booths, scrims & assemblies"
-          icon={Calendar}
-          color="amber"
-        />
-      </div>
-
-      {/* Tab Navigation (Scanner vs Events vs Logs) */}
-      <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-        <div className="flex gap-2">
-          <button
-            onClick={() => setActiveTab('scanner')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold uppercase font-display tracking-wider transition-all cursor-pointer ${
-              activeTab === 'scanner'
-                ? 'bg-blue-600 text-white shadow-xs'
-                : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200'
-            }`}
-          >
-            <Smartphone className="w-4 h-4" />
-            <span>Mobile Scanner (Member)</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('events')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold uppercase font-display tracking-wider transition-all cursor-pointer ${
-              activeTab === 'events'
-                ? 'bg-blue-600 text-white shadow-xs'
-                : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200'
-            }`}
-          >
-            <QrCode className="w-4 h-4" />
-            <span>Active QR Sessions ({events.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('logs')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold uppercase font-display tracking-wider transition-all cursor-pointer ${
-              activeTab === 'logs'
-                ? 'bg-blue-600 text-white shadow-xs'
-                : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200'
-            }`}
-          >
-            <Users className="w-4 h-4" />
-            <span>Attendance Log ({records.length})</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Active Tab View */}
-      {activeTab === 'scanner' && (
+      {/* Scanner tab (officers only) */}
+      {canHostEvents && currentTab === 'scanner' && (
         <div className="py-2">
           <div className="text-center mb-6">
             <h3 className="text-lg font-bold text-slate-900 font-display">
@@ -182,14 +161,15 @@ const AttendancePage = () => {
         </div>
       )}
 
-      {activeTab === 'events' && (
+      {/* Active sessions tab (officers only) */}
+      {canHostEvents && currentTab === 'events' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {events.map((evt) => {
             const count = records.filter((r) => r.eventId === evt.id).length;
             return (
               <div
                 key={evt.id}
-                className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between hover:border-blue-300 hover:shadow-md transition-all duration-300 group shadow-xs"
+                className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between hover:border-blue-300 transition-all duration-300 group"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-2">
@@ -239,7 +219,7 @@ const AttendancePage = () => {
 
                   <button
                     onClick={() => setActiveTab('scanner')}
-                    className="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-semibold font-display uppercase tracking-wider transition-all cursor-pointer shadow-2xs"
+                    className="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-semibold font-display uppercase tracking-wider transition-all cursor-pointer"
                   >
                     Scan Code
                   </button>
@@ -250,8 +230,9 @@ const AttendancePage = () => {
         </div>
       )}
 
-      {activeTab === 'logs' && (
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
+      {/* Attendance log (everyone) */}
+      {currentTab === 'logs' && (
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
           <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-slate-50/70">
             <div>
               <h3 className="text-base font-bold text-slate-900 font-display flex items-center gap-2">
@@ -346,11 +327,13 @@ const AttendancePage = () => {
       )}
 
       {/* Officer QR Generator Modal */}
-      <QRGeneratorModal
-        isOpen={isGeneratorOpen}
-        onClose={() => setIsGeneratorOpen(false)}
-        onCreated={loadData}
-      />
+      {canHostEvents && (
+        <QRGeneratorModal
+          isOpen={isGeneratorOpen}
+          onClose={() => setIsGeneratorOpen(false)}
+          onCreated={loadData}
+        />
+      )}
     </div>
   );
 };

@@ -9,6 +9,9 @@ import {
   AlertCircle
 } from 'lucide-react';
 
+// Only these roles handle attendance scanning
+const SCANNER_ROLES = ['executive', 'game_manager'];
+
 const QRScannerView = ({ activeEvents = [], onScanSuccess }) => {
   const { user } = useAuth();
   const { showToast } = useNotification();
@@ -17,6 +20,11 @@ const QRScannerView = ({ activeEvents = [], onScanSuccess }) => {
   const [isScanning, setIsScanning] = useState(true);
   const [lastCheckIn, setLastCheckIn] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
+
+  // Members (and finance officers) don't get the scanner
+  if (!SCANNER_ROLES.includes(user?.role)) {
+    return null;
+  }
 
   const handleProcessScan = (tokenToScan) => {
     setErrorMsg('');

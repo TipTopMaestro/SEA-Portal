@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Modal from '../common/Modal';
-import { QRCodeSVG } from 'qrcode.react';
+import { QRCodeCanvas } from 'qrcode.react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import { portalService } from '../../services/portalService';
-import { QrCode, Clock, RefreshCw, MapPin } from 'lucide-react';
+import { QrCode, Clock, RefreshCw, MapPin, Download } from 'lucide-react';
 
 const QRGeneratorModal = ({ isOpen, onClose, onCreated }) => {
   const { user: currentOfficer } = useAuth();
@@ -22,6 +22,7 @@ const QRGeneratorModal = ({ isOpen, onClose, onCreated }) => {
   const [activeEvent, setActiveEvent] = useState(null);
   const [timeLeft, setTimeLeft] = useState(3600);
   const [submitting, setSubmitting] = useState(false);
+  const qrWrapRef = useRef(null);
 
   useEffect(() => {
     let timer;
@@ -72,6 +73,19 @@ const QRGeneratorModal = ({ isOpen, onClose, onCreated }) => {
     setActiveEvent((prev) => (prev ? { ...prev, qrToken: newToken } : null));
     setTimeLeft(formData.durationMinutes * 60);
     showToast('Refreshed QR Code security token!', 'info');
+  };
+
+  const handleDownloadQR = () => {
+    const canvas = qrWrapRef.current?.querySelector('canvas');
+    if (!canvas) return;
+    const link = document.createElement('a');
+    const safeName = (activeEvent?.title || 'attendance')
+      .replace(/[^a-z0-9]+/gi, '_')
+      .toLowerCase();
+    link.download = `qr_${safeName}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    showToast('QR code downloaded!', 'success');
   };
 
   const formatCountdown = (seconds) => {
@@ -198,13 +212,17 @@ const QRGeneratorModal = ({ isOpen, onClose, onCreated }) => {
       ) : (
         /* Display Live QR Code View */
         <div className="flex flex-col items-center text-center space-y-4 py-2">
-          {/* QR Presentation Box */}
-          <div className="relative p-5 rounded-3xl bg-white shadow-xl border-4 border-blue-600">
-            <QRCodeSVG
+          {/* QR Presentation Box (stays white so phones can scan it) */}
+          <div
+            ref={qrWrapRef}
+            className="relative p-5 rounded-3xl bg-[#ffffff] shadow-xl border-4 border-blue-600"
+          >
+            <QRCodeCanvas
               value={activeEvent.qrToken}
-              size={220}
+              size={600}
+              marginSize={2}
               level="H"
-              includeMargin={false}
+              style={{ width: 220, height: 220 }}
             />
           </div>
 
@@ -241,6 +259,16 @@ const QRGeneratorModal = ({ isOpen, onClose, onCreated }) => {
           <div className="text-[11px] font-mono text-slate-500 px-3 py-1 rounded bg-slate-50 border border-slate-200">
             Session Token: <span className="text-slate-800 font-semibold">{activeEvent.qrToken}</span>
           </div>
+
+          {/* Download QR */}
+          <button
+            type="button"
+            onClick={handleDownloadQR}
+            className="w-full px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 text-white font-semibold font-display tracking-wider uppercase text-xs shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <Download className="w-4 h-4" />
+            <span>Download QR Code</span>
+          </button>
 
           <div className="pt-3 w-full flex items-center justify-between border-t border-slate-100">
             <button
